@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .api_client import APIClient
 from .models import User, CreateMessageRequest, Message
 from pydantic import ValidationError
@@ -19,49 +19,67 @@ class MessageClient:
         Creates a new message
 
         Args:
-            sender_number: The sender's phone number
-            recipient_id: The unique identifier of a Contact
-            content: The text content of the message
+            sender_number: The sender's phone number.
+            recipient_id: The unique identifier of a Contact.
+            content: The text content of the message.
 
         Returns:
-            A response containing the created user's details.
+            A response containing the created message details.
         """
-        request_body = {
-            "from": sender_number,
-            "content": content,
-            "to": {
-                "id": recipient_id
-            }
-        }
+        try:
+            request_body = CreateMessageRequest(from_=sender_number, to=recipient_id, content=content)
+        except ValidationError as e:
+            print(e.errors())
 
         try:
-            response = self.api_client.request("POST", "/users", data=request_body)
+            response = self.api_client.request("POST", "/messages", data=request_body)
         except HTTPError as httpe:
             print(httpe.errors())
 
         return Message(**response)
 
 
-    def get_mesage(self, user_id: int) -> User:
+    def get_mesage(self, msg_id: str) -> User:
         """
-        Retrieves a user by ID.
+        Retrieves a message by ID.
 
         Args:
-            user_id: The ID of the user to retrieve.
+            msg_id: The unique ID of the message to retrieve.
 
         Returns:
-            A User object.
+            A Message object.
         """
-        response = self.api_client.request("GET", f"/users/{user_id}")
-        return User(**response)
+        try:
+            response = self.api_client.request("GET", f"/messages/{msg_id}")
+        except HTTPError as httpe:
+            print(httpe.errors())
+
+        return Message(**response)
     
-    def list_messages(self) -> List[User]:
+    def list_messages(self, page: Optional[int] = None, limit: Optional[int] = None) -> List[Message]:
         """
-        Retrieves a list of users.
+        Retrieves a list of messages.
 
         Returns:
-            A list of User objects.
+            A list of Message objects.
         """
-        response = self.api_client.request("GET", "/users")
-        return [User(**user) for user in response]
+        
+        params = {}
+
+        if page:
+            if not isinstance(page, int) or page <= 0:
+                raise ValueError(f"Invalid value for parameter \'page\': {page}. Must be a positive integer.")
+            params["page"] = page
+
+        if limit:
+            if not isinstance(limit, int) or page <= 0:
+                raise ValueError(f"Invalid value for parameter \'limit\': {limit}. Must be a positive integer.")
+            params["limit"] = limit
+
+        try:
+            response = self.api_client.request("GET", "/messages", params=params)
+        except HTTPError as httpe:
+            print(httpe.errors())
+
+        return [Message(**msg) for msg in response]
     
