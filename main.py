@@ -1,7 +1,7 @@
 from sdk import APIClient, APIEndpoints
 
 # Initialize the client
-client = APIClient(base_url="https://api.example.com", api_key="your_api_key")
+client = APIClient(base_url="https://localhost:3000", api_key="there-is-no-key")
 
 # Initialize API endpoints
 api = APIEndpoints(client)
