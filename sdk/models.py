@@ -19,21 +19,18 @@ class Message(BaseModel):
 class MessagesResponse(BaseModel):
     messages: List[Message]
     page: int
-    quantity_per_page: int = Field(..., alias="quantityPerPage")
+    quantityPerPage: int
 
 
 class Contact(BaseModel):
     id: str
     name: str
     phone: str
-    email: Optional[str]
-    created_at: Optional[str] = Field(None, alias="createdAt")
-    updated_at: Optional[str] = Field(None, alias="updatedAt")
 
 class ContactResponse(BaseModel):
     contact: Contact
 
 class ContactListResponse(BaseModel):
     contacts: list[Contact]
-    page: int
-    quantity_per_page: int = Field(..., alias="quantityPerPage")
+    pageNumber: int
+    pageSize: int

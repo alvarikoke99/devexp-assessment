@@ -25,12 +25,25 @@ class APIClient:
             method: HTTP method (GET, POST, etc.).
             endpoint: API endpoint (relative path).
             params: Query parameters for the request.
-            data: Payload for the request.
+            json: Payload for the request.
 
         Returns:
             Response JSON data or raises an exception.
         """
         url = f"{self.base_url}{endpoint}"
-        response = self.session.request(method=method, url=url, params=params, json=json)
-        response.raise_for_status()  # Raise an error for HTTP 4xx/5xx
-        return response.json()
+        try:
+            response = self.session.request(method=method, url=url, params=params, json=json)
+            response.raise_for_status()
+
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP Error occurred: {http_err}")
+            print(f"Response Body: {response.text}")
+            raise
+        
+        if response.status_code == 204:
+            return None 
+        
+        try:
+            return response.json()
+        except ValueError:
+            raise ValueError(f"Failed to parse JSON response for {response.url}: {response.text}")

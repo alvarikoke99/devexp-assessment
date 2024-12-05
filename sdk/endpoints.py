@@ -2,29 +2,11 @@ from .client import APIClient
 from .models import Contact, ContactResponse, ContactListResponse, Message, MessagesResponse
 from typing import Optional
 
-class MessageEndpoints:
+class APIEndpoints:
     def __init__(self, client: APIClient):
         self.client = client
 
     # MESSAGE ENDPOINTS
-
-    def get_messages(self, page: int, per_page: int) -> MessagesResponse:
-        """
-        Fetch messages with pagination.
-
-        Args:
-            page (int): Page number.
-            per_page (int): Number of messages per page.
-
-        Returns:
-            MessagesResponse: Parsed response as a Pydantic model.
-        """
-        response = self.client.request(
-            method="GET",
-            endpoint="/messages",
-            params={"page": page, "per_page": per_page},
-        )
-        return MessagesResponse.model_validate(response)
 
     def send_message(self, from_: str, to: dict, content: str) -> Message:
         """
@@ -50,9 +32,50 @@ class MessageEndpoints:
         )
         return Message.model_validate(response)
 
+    def get_messages(self, page: Optional[int] = None, per_page: Optional[int] = None) -> MessagesResponse:
+        """
+        Fetch messages with pagination.
+
+        Args:
+            page (int): Page number.
+            per_page (int): Number of messages per page.
+
+        Returns:
+            MessagesResponse: Parsed response as a Pydantic model.
+        """
+        params = {}
+
+        if page:
+            params["page"] = page
+        if page:
+            params["per_page"] = per_page
+
+        response = self.client.request(
+            method="GET",
+            endpoint="/messages",
+            params=params,
+        )
+        return MessagesResponse.model_validate(response)
+    
+    def get_message_by_id(self, msg_id: str) -> ContactResponse:
+        """
+        Fetch details of a specific message.
+
+        Args:
+            msg_id (str): ID of the message.
+
+        Returns:
+            Message: Parsed response as a Pydantic model.
+        """
+        response = self.client.request(
+            method="GET",
+            endpoint=f"/messages/{msg_id}",
+        )
+        return Message.model_validate(response)
+
     # CONTACT ENDPOINTS
 
-    def get_contacts(self, page: int, per_page: int) -> ContactListResponse:
+    def get_contacts(self, page: Optional[int] = None, per_page: Optional[int] = None) -> ContactListResponse:
         """
         Fetch a list of contacts with pagination.
 
@@ -63,10 +86,17 @@ class MessageEndpoints:
         Returns:
             ContactListResponse: Parsed response as a Pydantic model.
         """
+        params = {}
+
+        if page:
+            params["page"] = page
+        if page:
+            params["per_page"] = per_page
+
         response = self.client.request(
             method="GET",
             endpoint="/contacts",
-            params={"page": page, "per_page": per_page},
+            params=params,
         )
         return ContactListResponse.model_validate(response)
 
@@ -86,7 +116,7 @@ class MessageEndpoints:
         )
         return ContactResponse.model_validate(response)
 
-    def create_contact(self, name: str, phone: str, email: Optional[str] = None) -> Contact:
+    def create_contact(self, name: str, phone: str) -> Contact:
         """
         Create a new contact.
 
@@ -98,7 +128,7 @@ class MessageEndpoints:
         Returns:
             Contact: The created contact as a Pydantic model.
         """
-        payload = {"name": name, "phone": phone, "email": email}
+        payload = {"name": name, "phone": phone}
         response = self.client.request(
             method="POST",
             endpoint="/contacts",
