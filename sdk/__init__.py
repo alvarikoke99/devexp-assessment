@@ -1,6 +1,7 @@
-from .api_client import APIClient
-from .contacts import ContactClient
-from .messages import MessageClient
+from .client import APIClient
+from .endpoints import APIEndpoints
+from .models import Message, MessagesResponse
+
 
 class SDK:
     def __init__(self, base_url: str, api_key: str):
