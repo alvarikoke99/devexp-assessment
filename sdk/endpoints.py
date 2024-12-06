@@ -1,5 +1,5 @@
 from .client import APIClient
-from .models import Contact, ContactResponse, ContactListResponse, Message, MessagesResponse
+from .models import Contact, ContactListResponse, Message, MessagesResponse
 from typing import Optional
 
 class APIEndpoints:
@@ -8,13 +8,13 @@ class APIEndpoints:
 
     # MESSAGE ENDPOINTS
 
-    def send_message(self, from_: str, to: dict, content: str) -> Message:
+    def send_message(self, from_: str, to: str, content: str) -> Message:
         """
         Send a new message.
 
         Args:
             from_ (str): Sender ID.
-            to (dict): Recipient details.
+            to (str): Recipient id.
             content (str): Message content.
 
         Returns:
@@ -22,7 +22,9 @@ class APIEndpoints:
         """
         payload = {
             "from": from_,
-            "to": to,
+            "to": {
+                "id": to
+            },
             "content": content,
         }
         response = self.client.request(
@@ -57,7 +59,7 @@ class APIEndpoints:
         )
         return MessagesResponse.model_validate(response)
     
-    def get_message_by_id(self, msg_id: str) -> ContactResponse:
+    def get_message_by_id(self, msg_id: str) -> Message:
         """
         Fetch details of a specific message.
 
@@ -100,7 +102,7 @@ class APIEndpoints:
         )
         return ContactListResponse.model_validate(response)
 
-    def get_contact(self, contact_id: str) -> ContactResponse:
+    def get_contact(self, contact_id: str) -> Contact:
         """
         Fetch details of a specific contact.
 
@@ -114,7 +116,7 @@ class APIEndpoints:
             method="GET",
             endpoint=f"/contacts/{contact_id}",
         )
-        return ContactResponse.model_validate(response)
+        return Contact.model_validate(response)
 
     def create_contact(self, name: str, phone: str) -> Contact:
         """
@@ -123,7 +125,6 @@ class APIEndpoints:
         Args:
             name (str): Contact name.
             phone (str): Contact phone number.
-            email (Optional[str]): Contact email.
 
         Returns:
             Contact: The created contact as a Pydantic model.
@@ -136,22 +137,21 @@ class APIEndpoints:
         )
         return Contact.model_validate(response)
 
-    def update_contact(self, contact_id: str, name: Optional[str] = None, phone: Optional[str] = None, email: Optional[str] = None) -> Contact:
+    def update_contact(self, contact_id: str, name: str, phone: str) -> Contact:
         """
         Update an existing contact.
 
         Args:
             contact_id (str): ID of the contact to update.
-            name (Optional[str]): New contact name.
-            phone (Optional[str]): New contact phone number.
-            email (Optional[str]): New contact email.
+            name (str): New contact name.
+            phone (str): New contact phone number.
 
         Returns:
             Contact: The updated contact as a Pydantic model.
         """
-        payload = {"name": name, "phone": phone, "email": email}
+        payload = {"name": name, "phone": phone}
         response = self.client.request(
-            method="PUT",
+            method="PATCH",
             endpoint=f"/contacts/{contact_id}",
             json=payload,
         )

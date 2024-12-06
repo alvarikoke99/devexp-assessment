@@ -56,7 +56,7 @@ def test_get_contacts(api):
 @responses.activate
 def test_update_contact(api):
     responses.add(
-        responses.PUT,
+        responses.PATCH,
         BASE_URL + "/contacts/1",
         json={"id": "1", "name": "The Administrator", "phone": "+1234567890"},
         status=200,

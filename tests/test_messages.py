@@ -5,6 +5,8 @@ from sdk.client import APIClient
 from sdk.endpoints import APIEndpoints
 from dotenv import load_dotenv
 
+from sdk.models import Contact
+
 load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL", "https://localhost:3000")
@@ -33,7 +35,7 @@ def test_get_messages(api):
                     "id": "1",
                     "status": "queued",
                     "createdAt": "2024-12-04T13:33:24.361Z",
-                    "to": {"name": "Alyx Vance", "phone": "+123", "id": "123"},
+                    "to": "123",
                 }
             ],
             "page": 1,
@@ -57,14 +59,14 @@ def test_send_message(api):
             "id": "1",
             "status": "queued",
             "createdAt": "2024-12-04T13:33:24.361Z",
-            "to": {"name": "GLaDOS", "phone": "+123", "id": "123"},
+            "to": "123",
         },
         status=201,
     )
 
     message = api.send_message(
         from_="Chell",
-        to={"name": "GLaDOS", "phone": "+123", "id": "123"},
+        to="123",
         content="The cake is a lie.",
     )
     assert message.id == "1"
@@ -81,7 +83,7 @@ def test_get_message_by_id(api):
             "id": "1",
             "status": "queued",
             "createdAt": "2024-12-04T13:33:24.361Z",
-            "to": {"name": "The Companion Cube", "phone": "+123", "id": "123"},
+            "to": "123",
         },
         status=200,
     )
